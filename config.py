@@ -10,6 +10,10 @@ LOG_PATH = Path("./logs/log.txt")
 
 TEST_LOG_PATH = Path("./logs/test_log.txt")
 
+IMAGES_EDA_PATH = Path("./images/eda")
+
+IMAGES_RESULTS_PATH = Path("./images/results")
+
 CAT_COLUMNS = [
     'Gender',
     'Education_Level',
