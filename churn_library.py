@@ -81,7 +81,8 @@ class ChurnPredictor():
         Returns
         -------
         Path
-
+            same path for convenience if no error raised and modifications
+            were successful
 
         Raises
         ------
@@ -174,7 +175,7 @@ class ChurnPredictor():
         ----------
         col : str
             Column name for histogram in self.data
-        stat : "count", "probability" 
+        stat : "count", "probability"
             Denotes the type of histogram
         save_path : path-like
             Path to directory where results will be saves
@@ -206,18 +207,22 @@ class ChurnPredictor():
         fig.savefig(Path(save_path) / f"{self.timestamp}_corr_heatmap.png")
 
     def encoder_helper(self, category_list, response="Churn"):
-        '''
-        helper function to turn each categorical column into a new column with
-        propotion of churn for each category - associated with cell 15 from the notebook
-        Modifies input df in-place, return is only for convenience!
-        input:
-                df: pandas dataframe
-                category_lst: list of columns that contain categorical features
-                response: string of response name [optional argument that could be used for naming variables or index y column]
+        """Helper function to turn each categorical column on self.data
+        into a mew column with propotion of response variable for each category
 
-        output:
-                df: pandas dataframe with new columns for
-        '''
+        Parameters
+        ----------
+        category_list : list
+            list of columns that contain categorical features
+        response : str, optional
+            column name of the response variable, by default "Churn"
+
+        Returns
+        -------
+        pd.DataFrame
+            Returns modified DataFrame for convenience
+        """
+
         for col in category_list:
             self._encode_column(col, response)
             logger.info("Encoded column %s with average %s", col, response)
@@ -250,17 +255,21 @@ class ChurnPredictor():
         random_state=42,
         **kwargs,
     ):
-        '''
-        input:
-                df: pandas dataframe
-                response: string of response name [optional argument that could be used for naming variables or index y column]
+        """Creates X and y dataframes, plus train test split and stores them
+        in the object
 
-        output:
-                x_train: X training data
-                x_test: X testing data
-                y_train: y training data
-                y_test: y testing data
-        '''
+        Parameters
+        ----------
+        response : str
+            the response/target/y column name
+        keep_cols : List[str]
+            which features columns to retain in the X dataframes
+        test_size : float, optional
+            Percentage of records left for validation dataset, by default 0.3
+        random_state : int, optional
+            random_state fed into train_test_split, by default 42
+        """
+
         self.x_full = self.data[keep_cols]
         self.y_full = self.data[response]
         self.x_train, self.x_test, self.y_train, self.y_test = (
@@ -273,22 +282,26 @@ class ChurnPredictor():
             )
         )
         logger.info("Created train test split")
-        return self.x_train, self.x_test, self.y_train, self.y_test
 
     def train_models(
         self,
         save_path=Path("./models"),
     ):
-        '''
-        train, store model results: images + scores, and store models
-        input:
-                x_train: X training data
-                x_test: X testing data
-                y_train: y training data
-                y_test: y testing data
-        output:
-                None
-        '''
+        """Train and store Random Forest and Logistic Regression models
+
+        Parameters
+        ----------
+        save_path : path-like, optional
+            Path were pickled models will be saved, by default Path("./models")
+
+        Returns
+        -------
+        GridSearchCV
+            GridSearchCV used to train the Random Forest classifier
+        LogisticRegression
+            Trained LogisticRegression object
+        """
+
         save_path = self._validate_directory_path(save_path)
 
         param_grid = self.model_params["param_grid"]
@@ -368,20 +381,27 @@ class ChurnPredictor():
         model_abbrv,
         save_path,
     ):
-        '''
-        produces classification report for training and testing results and stores report as image
-        in images folder
-        input:
-                y_train: training response values
-                y_test:  test response values
-                y_train_preds_lr: training predictions from logistic regression
-                y_train_preds_rf: training predictions from random forest
-                y_test_preds_lr: test predictions from logistic regression
-                y_test_preds_rf: test predictions from random forest
+        """Produces classification report for training and testing results
+        and stores report as image in save_path
 
-        output:
-                None
-        '''
+        Parameters
+        ----------
+        y_train : pd.DataFrame
+            training response values
+        y_train_preds : pd.DataFrame
+            training predictions
+        y_test : pd.DataFrame
+            test response values
+        y_test_preds : pd.DataFrame
+            test predictions
+        model_name : str
+            Long model name to be used in image titles
+        model_abbrv : str
+            Model abbreviation used in image path name
+        save_path : path-like
+            Path were images are to be stored
+        """
+
         save_path = self._validate_directory_path(save_path)
         font_dict = {
             "fontsize": 10,
@@ -412,7 +432,7 @@ class ChurnPredictor():
             Path where results will be saved to
         """
         save_path = self._validate_directory_path(save_path)
-        
+
         self._feature_importance_plot(
             self.cv_rfc.best_estimator_,
             "Random Forest",
@@ -427,15 +447,26 @@ class ChurnPredictor():
         model_abbrv,
         save_path,
     ):
-        '''
-        creates and stores the feature importances in pth
-        input:
-                model: model object containing feature_importances_
-                save_path: path to store the figure
+        """Creates and stores features importance plots
 
-        output:
-                None
-        '''
+        Parameters
+        ----------
+        model : 
+            model object containing feature_importances_
+        model_name : str
+            Long model name to be used in image titles
+        model_abbrv : str
+            Model abbreviation used in image path name
+        save_path : path-like
+            Path were images are to be stored
+
+        Raises
+        ------
+        ValueError
+            Raised if model feature importances and columns in self.X_test
+            do not match up
+        """
+
         save_path = self._validate_directory_path(save_path)
 
         # Calculate feature importances
