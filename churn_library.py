@@ -341,9 +341,9 @@ class ChurnPredictor():
 
         return self.cv_rfc, self.lrc
 
-    def create_classification_reports(self, save_path):
+    def create_model_reports(self, save_path):
         '''Creates images of Logistic Regression and Random Forest
-        classification results
+        classification results and ROC curves
 
         Parameters
         ----------
@@ -366,6 +366,20 @@ class ChurnPredictor():
             self.y_train_preds_rfc,
             self.y_test,
             self.y_test_preds_rfc,
+            "Random Forest",
+            "rfc",
+            save_path,
+        )
+
+        self._roc_curve_plots(
+            self.lrc,
+            "Logistic Regression",
+            "lrc",
+            save_path,
+        )
+
+        self._roc_curve_plots(
+            self.cv_rfc.best_estimator_,
             "Random Forest",
             "rfc",
             save_path,
@@ -410,8 +424,7 @@ class ChurnPredictor():
 
         train_report = classification_report(y_train, y_train_preds)
         test_report = classification_report(y_test, y_test_preds)
-
-        plt.rc('figure', figsize=(5, 5))
+        plt.figure(figsize=(6,6))
         plt.text(0.01, 1.25, f'{model_name} Train', font_dict)
         plt.text(0.01, 0.05, train_report, font_dict)
         plt.text(0.01, 0.6, f'{model_name} Test', font_dict)
@@ -421,6 +434,50 @@ class ChurnPredictor():
             f"{self.timestamp}_{model_abbrv}_model_classification_report.png"
         plt.savefig(img_path)
         logger.info("Saved %s results to %s", model_name, img_path)
+
+    def _roc_curve_plots(
+        self,
+        model,
+        model_name,
+        model_abbrv,
+        save_path,
+    ):
+        """Produces classification report for training and testing results
+        and stores report as image in save_path
+
+        Parameters
+        ----------
+        y_train : pd.DataFrame
+            training response values
+        y_train_preds : pd.DataFrame
+            training predictions
+        y_test : pd.DataFrame
+            test response values
+        y_test_preds : pd.DataFrame
+            test predictions
+        model_name : str
+            Long model name to be used in image titles
+        model_abbrv : str
+            Model abbreviation used in image path name
+        save_path : path-like
+            Path were images are to be stored
+        """
+
+        plt.figure(figsize=(15, 8))
+        ax = plt.gca()
+        plot_roc_curve(
+            model,
+            self.x_test,
+            self.y_test,
+            ax=ax,
+            alpha=0.8
+        )
+        img_path = (
+            save_path /
+            f"{self.timestamp}_{model_abbrv}_model_roc_curve.png"
+        )
+        plt.savefig(img_path)
+        logger.info("Saved %s ROC curve to %s", model_name, img_path)
 
     def create_feature_importance_plots(self, save_path):
         """Creates images of features importances for
@@ -527,7 +584,7 @@ class ChurnPredictor():
             save_path=self.conf["model_save_path"]
         )
 
-        self.create_classification_reports(self.conf["images_results_path"])
+        self.create_model_reports(self.conf["images_results_path"])
 
         self.create_feature_importance_plots(self.conf["images_results_path"])
 
