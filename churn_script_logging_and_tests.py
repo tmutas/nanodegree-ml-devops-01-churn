@@ -24,9 +24,12 @@ logger = logging.getLogger()
 
 
 def test_import(cp_test: ch.ChurnPredictor):
-    '''
-    test data import
-    '''
+    """Test Importing data
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with parameters
+    """
     try:
         df = cp_test.import_data(conf["bank_data_path"])
         logger.info("Testing import_data: SUCCESS")
@@ -53,9 +56,15 @@ def test_import(cp_test: ch.ChurnPredictor):
 
 
 def test_eda(cp_test: ch.ChurnPredictor, tmpdir):
-    '''
-    test perform eda function
-    '''
+    """Test Perform Exploratory Data Analysis outputs
+
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with parameters
+    tmpdir : path
+        Path where the results are to be stored. Can be a temporary directory.
+    """
     cp_test.import_data("./data/bank_data.csv")
 
     cp_test.perform_eda(tmpdir)
@@ -85,9 +94,17 @@ def test_eda(cp_test: ch.ChurnPredictor, tmpdir):
 
 
 def test_encoder_helper(cp_test: ch.ChurnPredictor, cat_list, response):
-    '''
-    test encoder helper
-    '''
+    """Test Encode helper
+
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with parameters
+    cat_list : list[str]
+        List of category columns to be encoded in test
+    response : str
+        Name of the response column, used in encoding
+    """
     cp_test.import_data(conf["bank_data_path"])
 
     logger.info("Testing encoder_helper")
@@ -139,9 +156,21 @@ def test_perform_feature_engineering(
     keep_cols,
     test_size
 ):
-    '''
-    test perform_feature_engineering
-    '''
+    """Test feature engineering and correct train test split
+
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with params and imported and encoded
+        data
+    response : str
+        Name of the response column
+    keep_cols : list[str]
+        Feature columns to be kept for creating X data
+    test_size : float
+        Fraction of the full data to be split for test
+    """
+
     logger.info("Testing perform_feature_engineering")
 
     cp_test.perform_feature_engineering(
@@ -202,9 +231,16 @@ def test_perform_feature_engineering(
 
 
 def test_train_models(cp_test: ch.ChurnPredictor, tmpdir: Path):
-    '''
-    test train_models
-    '''
+    """Test Perform Exploratory Data Analysis outputs
+
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with parameters, and having been run
+        the encoding and feature engineering
+    tmpdir : path
+        Path where the results are to be stored. Can be a temporary directory.
+    """
     cp_test.train_models(tmpdir)
 
     try:
@@ -224,6 +260,16 @@ def test_train_models(cp_test: ch.ChurnPredictor, tmpdir: Path):
 
 
 def test_create_model_reports(cp_test: ch.ChurnPredictor, tmpdir: Path):
+    """Test creating model reports
+
+    Parameters
+    ----------
+    cp_test : ch.ChurnPredictor
+        ChurnPredictor object, initialized with parameters and a trained model
+    tmpdir : path
+        Path where the results are to be stored. Can be a temporary directory.
+    """
+
     cp_test.create_model_reports(tmpdir)
 
     try:
