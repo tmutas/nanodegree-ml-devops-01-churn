@@ -385,6 +385,13 @@ class ChurnPredictor():
             save_path,
         )
 
+        self._feature_importance_plot(
+            self.cv_rfc.best_estimator_,
+            "Random Forest",
+            "rfc",
+            save_path
+        )
+
     def _classification_report_image(
         self,
         y_train,
@@ -479,24 +486,6 @@ class ChurnPredictor():
         plt.savefig(img_path)
         logger.info("Saved %s ROC curve to %s", model_name, img_path)
 
-    def create_feature_importance_plots(self, save_path):
-        """Creates images of features importances for
-        Logistic Regression and Random Forest model
-
-        Parameters
-        ----------
-        save_path : path-like
-            Path where results will be saved to
-        """
-        save_path = self._validate_directory_path(save_path)
-
-        self._feature_importance_plot(
-            self.cv_rfc.best_estimator_,
-            "Random Forest",
-            "rfc",
-            save_path
-        )
-
     def _feature_importance_plot(
         self,
         model,
@@ -585,9 +574,6 @@ class ChurnPredictor():
         )
 
         self.create_model_reports(self.conf["images_results_path"])
-
-        self.create_feature_importance_plots(self.conf["images_results_path"])
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
