@@ -105,12 +105,12 @@ def test_encoder_helper(cp_test: ch.ChurnPredictor, cat_list, response):
                 "Testing encoder_helper: Column %s to be encoded"
                 "is not present in data!", col)
 
-    try:
-        assert response in cp_test.data.columns
-    except AssertionError:
-        logger.error(
-            "Testing encoder_helper: Response variable %s is"
-            "not a column in data", col)
+        try:
+            assert response in cp_test.data.columns
+        except AssertionError:
+            logger.error(
+                "Testing encoder_helper: Response variable %s is"
+                "not a column in data", col)
 
     logger.info("Running encoder_helper")
 
@@ -130,7 +130,7 @@ def test_encoder_helper(cp_test: ch.ChurnPredictor, cat_list, response):
             assert new_col_name in cp_test.data.columns
         except AssertionError:
             logger.error("Testing encoder_helper: Column %s was"
-            "not encoded!", col)
+                         "not encoded!", col)
 
 
 def test_perform_feature_engineering(
@@ -201,11 +201,68 @@ def test_perform_feature_engineering(
                      "Test data set is does not correspond to test_size")
 
 
-def test_train_models(cp_test: ch.ChurnPredictor):
+def test_train_models(cp_test: ch.ChurnPredictor, tmpdir: Path):
     '''
     test train_models
     '''
-    pass
+    cp_test.train_models(tmpdir)
+
+    try:
+        assert any("rfc_model.pkl" in fl for fl in os.listdir(tmpdir))
+        logger.info(
+            "Testing train_models: RandomForest model is trained and pickled")
+    except AssertionError:
+        logger.error("Testing train_models: RandomForest model failed!")
+
+    try:
+        assert any("logistic_model.pkl" in fl for fl in os.listdir(tmpdir))
+        logger.info(
+            "Testing train_models: Logistic Regression model is trained"
+            "and pickled")
+    except AssertionError:
+        logger.error("Testing train_models: Logistic Regression model failed!")
+
+
+def test_create_model_reports(cp_test: ch.ChurnPredictor, tmpdir: Path):
+    cp_test.create_model_reports(tmpdir)
+
+    try:
+        assert any(
+            "rfc_model_classification_report.png"
+            in fl for fl in os.listdir(tmpdir)
+        )
+        assert any(
+            "lrc_model_classification_report.png"
+            in fl for fl in os.listdir(tmpdir)
+        )
+        logger.info(
+            "Testing model_reports: Classification reports created")
+    except AssertionError:
+        logger.error("Testing train_models: Classification reports failed!")
+
+    try:
+        assert any(
+            "rfc_model_roc_curve.png"
+            in fl for fl in os.listdir(tmpdir)
+        )
+        assert any(
+            "lrc_model_roc_curve.png"
+            in fl for fl in os.listdir(tmpdir)
+        )
+        logger.info(
+            "Testing model_reports: ROC Curve plots created")
+    except AssertionError:
+        logger.error("Testing train_models: ROC Curve plots failed!")
+
+    try:
+        assert any(
+            "feature_importance.png"
+            in fl for fl in os.listdir(tmpdir)
+        )
+        logger.info(
+            "Testing model_reports: Feature importance plot created")
+    except AssertionError:
+        logger.error("Testing train_models: Feature importance plot failed!")
 
 
 if __name__ == "__main__":
@@ -239,5 +296,11 @@ if __name__ == "__main__":
         conf["columns"]["feature"],
         0.364
     )
+
+    with TemporaryDirectory() as tmpdir_main:
+        test_train_models(cp_main, tmpdir_main)
+
+    with TemporaryDirectory() as tmpdir_main:
+        test_create_model_reports(cp_main, tmpdir_main)
 
     logger.warning("All tests passed SUCCESSFULLY!")
