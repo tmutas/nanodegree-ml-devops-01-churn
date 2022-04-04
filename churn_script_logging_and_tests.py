@@ -1,4 +1,8 @@
-"""Testing and logging of functions in churn_library.py"""
+"""Testing and logging of functions in churn_library.py
+
+Author: Timo Mutas
+Date: 2022-04-04
+"""
 import logging
 import json
 import os

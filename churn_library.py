@@ -1,6 +1,10 @@
 '''Helper functions to perform Churn prediction
 
-If run as main script, the first argument points to a model parameter file
+If run as main script, the first argument points to a config file,
+and the second argument to a model parameter file
+
+Author: Timo Mutas
+Date: 2022-04-04
 '''
 import argparse
 import json
@@ -14,7 +18,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import shap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, plot_roc_curve
@@ -497,7 +500,7 @@ class ChurnPredictor():
 
         Parameters
         ----------
-        model : 
+        model :
             model object containing feature_importances_
         model_name : str
             Long model name to be used in image titles
